@@ -1,0 +1,48 @@
+{
+  "manifest_version": 3,
+  "name": "Reddit ThreadTrail",
+  "version": "1.0.2",
+  "description": "Automatically archive Reddit threads you visit as JSON and Markdown. Local files, no crawling.",
+  "minimum_chrome_version": "109",
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": [
+    "storage",
+    "downloads",
+    "alarms"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Reddit ThreadTrail",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png"
+    }
+  },
+  "options_page": "options.html",
+  "content_scripts": [
+    {
+      "matches": [
+        "https://reddit.com/*",
+        "https://www.reddit.com/*",
+        "https://old.reddit.com/*",
+        "https://new.reddit.com/*",
+        "https://sh.reddit.com/*",
+        "https://m.reddit.com/*"
+      ],
+      "js": [
+        "common.js",
+        "extractor.js",
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ]
+}

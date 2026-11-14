@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Reddit ThreadTrail</title><link rel="stylesheet" href="ui.css"></head>
+<body class="popup">
+  <header><div class="brand"><span class="mark" aria-hidden="true">↘</span><div><h1>Reddit ThreadTrail<span class="brand-dot">.</span></h1><p>Browse Reddit. Keep the trail.</p></div></div><span id="status" class="status">Loading</span></header>
+  <main>
+    <section class="hero"><span class="eyebrow">A little archive of your curiosity</span><h2>Read it.<br>Keep the useful bits.</h2><p>Threads and loaded comments, saved as clean JSON while you browse.</p><div class="actions"><button id="capture" class="primary">Capture now <span aria-hidden="true">↘</span></button><button id="toggle" class="secondary">Pause</button></div><p id="pageStatus" class="hint" aria-live="polite">Checking this page…</p></section>
+    <section class="destination"><span class="folder-icon" aria-hidden="true">▱</span><div><span class="eyebrow">Saving to</span><p id="folder">Downloads / Reddit ThreadTrail</p></div><button id="settings" class="text-button">Settings ↗</button></section>
+    <section class="history"><div class="section-title"><h3>Recent captures</h3><span id="count" class="hint"></span></div><ol id="history"></ol><p id="empty" class="empty" hidden>Nothing saved yet. Open a Reddit thread to start your archive.</p></section>
+    <p id="notice" class="notice" role="status" hidden></p>
+  </main>
+  <footer><span><i class="local-dot"></i> Local files · No extra requests</span><button id="export" class="text-button">Export visit index ↗</button></footer>
+  <script src="common.js"></script><script src="ui.js"></script>
+</body>
+</html>

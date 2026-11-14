@@ -1,0 +1,19 @@
+{
+  "name": "reddit-threadtrail",
+  "private": true,
+  "version": "1.0.2",
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "test:browser": "node tests/browser.mjs",
+    "package": "python3 scripts/package.py"
+  },
+  "description": "Automatically archive Reddit threads you visit as JSON and Markdown. Local files, no crawling.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/olegkhomenko/reddit-threadtrail.git"
+  },
+  "homepage": "https://github.com/olegkhomenko/reddit-threadtrail#readme",
+  "bugs": {
+    "url": "https://github.com/olegkhomenko/reddit-threadtrail/issues"
+  }
+}

@@ -1,0 +1,8 @@
+tests/artifacts/
+.DS_Store
+node_modules/
+*.zip
+.env
+.env.*
+__pycache__/
+*.py[cod]

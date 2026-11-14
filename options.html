@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>Reddit ThreadTrail · Settings</title><link rel="stylesheet" href="ui.css"></head>
+<body class="options">
+  <header><div class="brand"><span class="mark" aria-hidden="true">↘</span><div><h1>Reddit ThreadTrail<span class="brand-dot">.</span></h1><p>Browse Reddit. Keep the trail.</p></div></div><span class="eyebrow">Settings</span></header>
+  <main>
+    <section class="intro"><span class="eyebrow">Small tool. Useful trail.</span><h2>A home for what<br>you find on Reddit.</h2><p>Choose where your archive goes and what you keep.</p></section>
+    <form id="settingsForm">
+      <section class="setting-card"><label class="label" for="destination">Destination folder</label><p class="hint">Relative to your browser’s Downloads folder. Subfolders are welcome.</p><div class="path-input"><span>Downloads /</span><input id="destination" name="folder" type="text" required maxlength="160" placeholder="Reddit ThreadTrail" spellcheck="false"></div><p class="hint">Example: Research/Reddit. To save without a prompt, turn off “Ask where to save each file” in your browser’s Downloads settings.</p></section>
+      <section class="setting-card">
+        <label class="switch-row"><div><span class="label">Automatic capture</span><p>Save supported Reddit pages when you view them.</p></div><input id="enabled" type="checkbox" role="switch"></label>
+        <label class="switch-row"><div><span class="label">Feeds & search results</span><p>Keep loaded post summaries alongside your thread visits.</p></div><input id="captureListings" type="checkbox" role="switch"></label>
+        <label class="switch-row"><div><span class="label">Markdown companion</span><p>Add a readable .md copy alongside each JSON file.</p></div><input id="markdown" type="checkbox" role="switch"></label>
+      </section>
+      <div class="save-row"><button class="primary" type="submit">Save settings <span aria-hidden="true">↘</span></button><span class="hint">Folder and format changes apply to new visits.</span></div>
+      <p id="notice" class="notice" role="status" hidden></p>
+    </form>
+    <section class="about"><h3>What’s in a dump?</h3>
+      <p>Page URL, visit time, post text, authors, scores, links and loaded comments with parent IDs. Missing fields are null. Each visit gets one JSON file, updated as you load more content.</p>
+      <p>Capture starts after the page loads and normally updates every 20 seconds when content changes. Reaching the bottom of a thread triggers an earlier check and watches for newly loaded comments. Switching tabs triggers a best-effort final save. Use Capture now before closing a page if you need its latest content saved.</p>
+      <p>The extension reads Reddit’s loaded page only. It does not crawl, expand comments, fetch media files or send your archive to a server. Inbox, chat, profile and settings pages are excluded. A thread dump is a partial snapshot, not a full Reddit export.</p>
+      <p>The activity list keeps metadata for the most recent 200 visits. Older files stay in your archive. Files use UTC dates and contain public-facing content as rendered to your account, including content from communities you can access.</p>
+    </section>
+  </main>
+  <footer><span><i class="local-dot"></i> Your archive stays on your computer.</span><button id="export" class="text-button">Export visit index ↗</button></footer>
+  <script src="common.js"></script><script src="ui.js"></script>
+</body>
+</html>
