@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How Reddit ThreadTrail works</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #fafaf9; color: #181918; font-family: Arial, Helvetica, sans-serif; }
+    .page { width: 1600px; height: 900px; padding: 56px 56px 42px; }
+    header { height: 190px; display: flex; align-items: flex-start; justify-content: space-between; }
+    h1 { margin: 0; font-size: 58px; line-height: 1.08; letter-spacing: -2.3px; font-weight: 400; }
+    .intro { width: 420px; margin: 60px 0 0; color: #565956; font-size: 21px; line-height: 1.5; }
+    .layout { display: grid; grid-template-columns: 1048px 416px; gap: 24px; }
+    .canvas, .output { height: 600px; border: 1px solid #e9e7e3; border-radius: 28px; background: #f3f2ef; }
+    .canvas { position: relative; overflow: hidden; }
+    .legend { display: flex; align-items: center; gap: 31px; margin: 22px 24px 0; font-size: 17px; color: #777b77; }
+    .legend > span { display: flex; align-items: center; gap: 9px; }
+    .legend .active { padding: 10px 15px; background: #fff; color: #1e211e; border: 1px solid #e6e4e0; border-radius: 24px; box-shadow: 0 1px 2px #00000006; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex: none; }
+    .green { background: radial-gradient(circle at 32% 27%, #eef9ef 0%, #b7dac7 60%, #87ad99 100%); }
+    .blue { background: radial-gradient(circle at 32% 27%, #e0f3ff 0%, #a1caed 53%, #6e9bd0 100%); }
+    .purple { background: radial-gradient(circle at 32% 27%, #f5eaff 0%, #d1bdf0 60%, #ad92d2 100%); }
+    .orange { background: radial-gradient(circle at 32% 27%, #fff0d8 0%, #f5c0a5 57%, #dc998b 100%); }
+    .graph { display: block; width: 100%; height: 462px; margin-top: 4px; }
+    .graph .edge { fill: none; stroke: #666a67; stroke-width: 1.7; }
+    .graph .arrow { fill: #666a67; }
+    .graph .port { fill: #333733; }
+    .graph .label { font: 26px Arial, Helvetica, sans-serif; fill: #202320; }
+    .graph .note { font: 17px "SFMono-Regular", Consolas, monospace; fill: #ad542e; }
+    .graph .shadow { filter: url(#soft-shadow); }
+    .caption { margin: -2px 0 0; display: flex; align-items: center; justify-content: center; gap: 11px; color: #676c67; font-size: 18px; }
+    .caption span { background: #fff; border-radius: 18px; padding: 7px 13px; color: #353a35; font: 14px "SFMono-Regular", Consolas, monospace; }
+    .output { padding: 22px; }
+    .output-heading { height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; gap: 11px; background: #fff; box-shadow: 0 1px 2px #00000007; font-size: 21px; }
+    .output-heading .dot { width: 14px; height: 14px; }
+    .file-card { margin-top: 35px; padding: 25px 22px 24px; border-radius: 22px; border: 1px solid #e7e4df; background: #fff; box-shadow: 0 16px 36px #21201d08; }
+    .file-card h2 { margin: 0 0 22px; font-size: 25px; line-height: 1.25; letter-spacing: -.5px; font-weight: 400; }
+    .path { margin: 0 0 15px; color: #8b634f; font: 13px/1.8 "SFMono-Regular", Consolas, monospace; }
+    .file { padding: 17px 0; border-top: 1px solid #ecebe8; display: flex; align-items: center; justify-content: space-between; }
+    .file strong { font: 18px "SFMono-Regular", Consolas, monospace; font-weight: 400; }
+    .file small { font-size: 14px; color: #878a84; }
+    .data { margin: 15px 0 0; padding-top: 18px; border-top: 1px solid #ecebe8; color: #6c726c; font-size: 17px; line-height: 1.6; }
+    .local-note { margin: 27px 3px 0; display: flex; align-items: center; gap: 10px; font-size: 16px; color: #6d726c; }
+    .local-note .dot { width: 8px; height: 8px; }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <h1>How ThreadTrail<br>keeps a thread.</h1>
+      <p class="intro">You read and scroll.<br>The extension saves what loads.</p>
+    </header>
+    <div class="layout">
+      <section class="canvas" aria-label="Thread capture and update flow">
+        <div class="legend" aria-hidden="true">
+          <span class="active"><i class="dot green"></i>Your browser</span>
+          <span><i class="dot blue"></i>Capture</span>
+          <span><i class="dot purple"></i>Update</span>
+          <span><i class="dot orange"></i>Save</span>
+        </div>
+        <svg class="graph" viewBox="0 0 1048 462" role="img" aria-labelledby="graph-title graph-description">
+          <title id="graph-title">Reddit ThreadTrail saves visited threads and updates them when more comments load.</title>
+          <desc id="graph-description">A Reddit thread and additional comments flow into ThreadTrail. It reads only loaded content and saves JSON and optional Markdown in a local folder. New comments update the same visit file.</desc>
+          <defs>
+            <radialGradient id="node-green" cx="32%" cy="27%" r="82%"><stop stop-color="#f2faf3"/><stop offset=".55" stop-color="#c9e1d3"/><stop offset="1" stop-color="#9cbbaa"/></radialGradient>
+            <radialGradient id="node-blue" cx="32%" cy="27%" r="82%"><stop stop-color="#e4f5ff"/><stop offset=".53" stop-color="#a1caed"/><stop offset="1" stop-color="#6e9bd0"/></radialGradient>
+            <radialGradient id="node-purple" cx="32%" cy="27%" r="82%"><stop stop-color="#f7eeff"/><stop offset=".55" stop-color="#d8c3f4"/><stop offset="1" stop-color="#ae94d4"/></radialGradient>
+            <radialGradient id="node-orange" cx="32%" cy="27%" r="82%"><stop stop-color="#fff0d8"/><stop offset=".55" stop-color="#f5c0a5"/><stop offset="1" stop-color="#db998b"/></radialGradient>
+            <filter id="soft-shadow" x="-60%" y="-60%" width="220%" height="230%"><feDropShadow dx="0" dy="12" stdDeviation="15" flood-color="#4d554e" flood-opacity=".09"/></filter>
+            <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path class="arrow" d="M0 0 L7 4 L0 8 Z"/></marker>
+          </defs>
+          <line class="edge" x1="254" y1="169" x2="450" y2="225" marker-end="url(#arrowhead)"/>
+          <line class="edge" x1="294" y1="342" x2="454" y2="273" marker-end="url(#arrowhead)"/>
+          <line class="edge" x1="590" y1="246" x2="837" y2="246" marker-end="url(#arrowhead)"/>
+          <circle class="port" cx="254" cy="169" r="3.7"/>
+          <circle class="port" cx="294" cy="342" r="3.7"/>
+          <circle class="port" cx="590" cy="246" r="3.7"/>
+          <circle class="shadow" cx="195" cy="151" r="56" fill="url(#node-green)"/>
+          <text class="label" x="195" y="61" text-anchor="middle">Open a thread</text>
+          <text class="note" x="195" y="88" text-anchor="middle">you browse Reddit</text>
+          <circle class="shadow" cx="240" cy="366" r="56" fill="url(#node-purple)"/>
+          <text class="label" x="77" y="281">More comments</text>
+          <text class="note" x="77" y="308">you scroll or expand</text>
+          <circle class="shadow" cx="520" cy="246" r="69" fill="#f6faff" stroke="#252d33" stroke-width="1.8"/>
+          <circle cx="520" cy="246" r="61" fill="url(#node-blue)"/>
+          <text class="label" x="520" y="128" text-anchor="middle">ThreadTrail</text>
+          <text class="note" x="520" y="155" text-anchor="middle">reads loaded content</text>
+          <circle class="shadow" cx="902" cy="246" r="61" fill="#fffdf9" stroke="#c9c5bf" stroke-width="1.5"/>
+          <circle cx="902" cy="246" r="54" fill="url(#node-orange)"/>
+          <text class="label" x="902" y="128" text-anchor="middle">Local files</text>
+          <text class="note" x="902" y="155" text-anchor="middle">saved automatically</text>
+          <text class="note" x="716" y="283" text-anchor="middle">same visit, same file</text>
+        </svg>
+        <p class="caption"><span>UPDATE</span>New comments load. The saved file is refreshed.</p>
+      </section>
+      <aside class="output" aria-label="Local output files">
+        <div class="output-heading"><i class="dot orange" aria-hidden="true"></i>Your computer</div>
+        <div class="file-card">
+          <h2>One visit.<br>One saved thread.</h2>
+          <p class="path">Downloads /<br>Reddit ThreadTrail /</p>
+          <div class="file"><strong>thread.json</strong><small>structured data</small></div>
+          <div class="file"><strong>thread.md</strong><small>optional</small></div>
+          <p class="data">Post text, comments, links<br>and visit timestamps.</p>
+        </div>
+        <p class="local-note"><i class="dot green" aria-hidden="true"></i>Local files. No crawling.</p>
+      </aside>
+    </div>
+  </main>
+</body>
+</html>
