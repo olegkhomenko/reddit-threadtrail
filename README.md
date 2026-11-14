@@ -41,14 +41,4 @@ Only content loaded in a viewed tab is captured. This is a partial thread archiv
 
 Tab closing may interrupt the final save. Use **Capture now** before leaving if the latest comments matter. Captures over roughly 2 MB report an error rather than silently dropping content.
 
-## Development
-
-```sh
-npm test
-npm run test:browser
-npm run package
-```
-
-Tests use Node 22+ and synthetic Reddit pages. Browser tests default to Brave on macOS; set `CHROMIUM_BINARY` for another compatible Chromium executable. Packaging writes `../reddit-threadtrail.zip`.
-
 [Diagram source](docs/how-it-works.html) · [Changelog](CHANGELOG.md)
