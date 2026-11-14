@@ -7,12 +7,10 @@
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; background: #fafaf9; color: #181918; font-family: Arial, Helvetica, sans-serif; }
-    .page { width: 1600px; height: 900px; padding: 56px 56px 42px; }
-    header { height: 190px; display: flex; align-items: flex-start; justify-content: space-between; }
-    h1 { margin: 0; font-size: 58px; line-height: 1.08; letter-spacing: -2.3px; font-weight: 400; }
-    .intro { width: 420px; margin: 60px 0 0; color: #565956; font-size: 21px; line-height: 1.5; }
-    .layout { display: grid; grid-template-columns: 1048px 416px; gap: 24px; }
-    .canvas, .output { height: 600px; border: 1px solid #e9e7e3; border-radius: 28px; background: #f3f2ef; }
+    .page { width: 1200px; height: 800px; padding: 40px 48px; }
+    header { height: 140px; }
+    h1 { margin: 0; font-size: 48px; line-height: 1.08; letter-spacing: -2.3px; font-weight: 400; }
+    .canvas { height: 580px; border: 1px solid #e9e7e3; border-radius: 28px; background: #f3f2ef; }
     .canvas { position: relative; overflow: hidden; }
     .legend { display: flex; align-items: center; gap: 31px; margin: 22px 24px 0; font-size: 17px; color: #777b77; }
     .legend > span { display: flex; align-items: center; gap: 9px; }
@@ -22,7 +20,7 @@
     .blue { background: radial-gradient(circle at 32% 27%, #e0f3ff 0%, #a1caed 53%, #6e9bd0 100%); }
     .purple { background: radial-gradient(circle at 32% 27%, #f5eaff 0%, #d1bdf0 60%, #ad92d2 100%); }
     .orange { background: radial-gradient(circle at 32% 27%, #fff0d8 0%, #f5c0a5 57%, #dc998b 100%); }
-    .graph { display: block; width: 100%; height: 462px; margin-top: 4px; }
+    .graph { display: block; width: 100%; height: 442px; margin-top: 4px; }
     .graph .edge { fill: none; stroke: #666a67; stroke-width: 1.7; }
     .graph .arrow { fill: #666a67; }
     .graph .port { fill: #333733; }
@@ -30,28 +28,16 @@
     .graph .note { font: 17px "SFMono-Regular", Consolas, monospace; fill: #ad542e; }
     .graph .shadow { filter: url(#soft-shadow); }
     .caption { margin: -2px 0 0; display: flex; align-items: center; justify-content: center; gap: 11px; color: #676c67; font-size: 18px; }
-    .caption span { background: #fff; border-radius: 18px; padding: 7px 13px; color: #353a35; font: 14px "SFMono-Regular", Consolas, monospace; }
-    .output { padding: 22px; }
-    .output-heading { height: 55px; border-radius: 18px; display: flex; align-items: center; justify-content: center; gap: 11px; background: #fff; box-shadow: 0 1px 2px #00000007; font-size: 21px; }
-    .output-heading .dot { width: 14px; height: 14px; }
-    .file-card { margin-top: 35px; padding: 25px 22px 24px; border-radius: 22px; border: 1px solid #e7e4df; background: #fff; box-shadow: 0 16px 36px #21201d08; }
-    .file-card h2 { margin: 0 0 22px; font-size: 25px; line-height: 1.25; letter-spacing: -.5px; font-weight: 400; }
-    .path { margin: 0 0 15px; color: #8b634f; font: 13px/1.8 "SFMono-Regular", Consolas, monospace; }
-    .file { padding: 17px 0; border-top: 1px solid #ecebe8; display: flex; align-items: center; justify-content: space-between; }
-    .file strong { font: 18px "SFMono-Regular", Consolas, monospace; font-weight: 400; }
-    .file small { font-size: 14px; color: #878a84; }
-    .data { margin: 15px 0 0; padding-top: 18px; border-top: 1px solid #ecebe8; color: #6c726c; font-size: 17px; line-height: 1.6; }
-    .local-note { margin: 27px 3px 0; display: flex; align-items: center; gap: 10px; font-size: 16px; color: #6d726c; }
-    .local-note .dot { width: 8px; height: 8px; }
+    .caption .step-number { background: #fff; border-radius: 18px; padding: 7px 13px; color: #353a35; font: 14px "SFMono-Regular", Consolas, monospace; }
+    .flow { pointer-events: none; }
+    .reveal { opacity: 0; }
   </style>
 </head>
 <body>
   <main class="page">
     <header>
       <h1>How ThreadTrail<br>keeps a thread.</h1>
-      <p class="intro">You read and scroll.<br>The extension saves what loads.</p>
     </header>
-    <div class="layout">
       <section class="canvas" aria-label="Thread capture and update flow">
         <div class="legend" aria-hidden="true">
           <span class="active"><i class="dot green"></i>Your browser</span>
@@ -70,42 +56,120 @@
             <filter id="soft-shadow" x="-60%" y="-60%" width="220%" height="230%"><feDropShadow dx="0" dy="12" stdDeviation="15" flood-color="#4d554e" flood-opacity=".09"/></filter>
             <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path class="arrow" d="M0 0 L7 4 L0 8 Z"/></marker>
           </defs>
-          <line class="edge" x1="254" y1="169" x2="450" y2="225" marker-end="url(#arrowhead)"/>
-          <line class="edge" x1="294" y1="342" x2="454" y2="273" marker-end="url(#arrowhead)"/>
-          <line class="edge" x1="590" y1="246" x2="837" y2="246" marker-end="url(#arrowhead)"/>
-          <circle class="port" cx="254" cy="169" r="3.7"/>
-          <circle class="port" cx="294" cy="342" r="3.7"/>
-          <circle class="port" cx="590" cy="246" r="3.7"/>
-          <circle class="shadow" cx="195" cy="151" r="56" fill="url(#node-green)"/>
-          <text class="label" x="195" y="61" text-anchor="middle">Open a thread</text>
-          <text class="note" x="195" y="88" text-anchor="middle">you browse Reddit</text>
-          <circle class="shadow" cx="240" cy="366" r="56" fill="url(#node-purple)"/>
-          <text class="label" x="77" y="281">More comments</text>
-          <text class="note" x="77" y="308">you scroll or expand</text>
-          <circle class="shadow" cx="520" cy="246" r="69" fill="#f6faff" stroke="#252d33" stroke-width="1.8"/>
-          <circle cx="520" cy="246" r="61" fill="url(#node-blue)"/>
-          <text class="label" x="520" y="128" text-anchor="middle">ThreadTrail</text>
-          <text class="note" x="520" y="155" text-anchor="middle">reads loaded content</text>
-          <circle class="shadow" cx="902" cy="246" r="61" fill="#fffdf9" stroke="#c9c5bf" stroke-width="1.5"/>
-          <circle cx="902" cy="246" r="54" fill="url(#node-orange)"/>
-          <text class="label" x="902" y="128" text-anchor="middle">Local files</text>
-          <text class="note" x="902" y="155" text-anchor="middle">saved automatically</text>
-          <text class="note" x="716" y="283" text-anchor="middle">same visit, same file</text>
+          <g id="thread-edge" class="reveal">
+            <line id="thread-line" class="edge" x1="254" y1="169" x2="450" y2="225" marker-end="url(#arrowhead)"/>
+            <circle class="port" cx="254" cy="169" r="3.7"/>
+          </g>
+          <g id="comments-edge" class="reveal">
+            <line id="comments-line" class="edge" x1="294" y1="342" x2="454" y2="273" marker-end="url(#arrowhead)"/>
+            <circle class="port" cx="294" cy="342" r="3.7"/>
+          </g>
+          <g id="save-edge" class="reveal">
+            <line id="save-line" class="edge" x1="590" y1="246" x2="837" y2="246" marker-end="url(#arrowhead)"/>
+            <circle class="port" cx="590" cy="246" r="3.7"/>
+          </g>
+          <g id="thread-node">
+            <circle class="shadow" cx="195" cy="151" r="56" fill="url(#node-green)"/>
+            <text class="label" x="195" y="61" text-anchor="middle">Open a thread</text>
+            <text class="note" x="195" y="88" text-anchor="middle">you browse Reddit</text>
+          </g>
+          <g id="comments-node" class="reveal">
+            <circle class="shadow" cx="240" cy="366" r="56" fill="url(#node-purple)"/>
+            <text class="label" x="77" y="281">More comments</text>
+            <text class="note" x="77" y="308">you scroll or expand</text>
+          </g>
+          <g id="capture-node" class="reveal">
+            <g id="capture-orb">
+              <circle class="shadow" cx="520" cy="246" r="69" fill="#f6faff" stroke="#252d33" stroke-width="1.8"/>
+              <circle cx="520" cy="246" r="61" fill="url(#node-blue)"/>
+            </g>
+            <text class="label" x="520" y="128" text-anchor="middle">ThreadTrail</text>
+            <text class="note" x="520" y="155" text-anchor="middle">reads loaded content</text>
+          </g>
+          <g id="file-node" class="reveal">
+            <g id="file-orb">
+              <circle class="shadow" cx="902" cy="246" r="61" fill="#fffdf9" stroke="#c9c5bf" stroke-width="1.5"/>
+              <circle cx="902" cy="246" r="54" fill="url(#node-orange)"/>
+            </g>
+            <text class="label" x="902" y="128" text-anchor="middle">Local files</text>
+            <text class="note" x="902" y="155" text-anchor="middle">JSON + optional Markdown</text>
+          </g>
+          <text id="update-note" class="note reveal" x="716" y="283" text-anchor="middle">same visit, same file</text>
+          <circle id="thread-flow" class="flow" r="5" fill="#6e9bd0" opacity="0"/>
+          <circle id="comments-flow" class="flow" r="5" fill="#ae94d4" opacity="0"/>
+          <circle id="save-flow" class="flow" r="5" fill="#dc998b" opacity="0"/>
         </svg>
-        <p class="caption"><span>UPDATE</span>New comments load. The saved file is refreshed.</p>
+        <p class="caption" aria-live="off"><span id="step-number" class="step-number">01 / 05</span><span id="step-copy">Open a Reddit thread.</span></p>
       </section>
-      <aside class="output" aria-label="Local output files">
-        <div class="output-heading"><i class="dot orange" aria-hidden="true"></i>Your computer</div>
-        <div class="file-card">
-          <h2>One visit.<br>One saved thread.</h2>
-          <p class="path">Downloads /<br>Reddit ThreadTrail /</p>
-          <div class="file"><strong>thread.json</strong><small>structured data</small></div>
-          <div class="file"><strong>thread.md</strong><small>optional</small></div>
-          <p class="data">Post text, comments, links<br>and visit timestamps.</p>
-        </div>
-        <p class="local-note"><i class="dot green" aria-hidden="true"></i>Local files. No crawling.</p>
-      </aside>
-    </div>
   </main>
+  <script>
+    (() => {
+      const duration = 10000;
+      const el = id => document.getElementById(id);
+      const clamp = value => Math.max(0, Math.min(1, value));
+      const progress = (time, start, length = 550) => clamp((time - start) / length);
+      const ease = value => 1 - Math.pow(1 - value, 3);
+      const reveal = (id, time, start, translate = false) => {
+        const p = ease(progress(time, start));
+        const end = 1 - progress(time, 9600, 400);
+        el(id).style.opacity = p * end;
+        if (translate) el(id).setAttribute('transform', `translate(0 ${(1 - p) * 12})`);
+      };
+      const draw = (id, time, start) => {
+        const line = el(id);
+        const length = line.getTotalLength();
+        line.style.strokeDasharray = length;
+        line.style.strokeDashoffset = length * (1 - ease(progress(time, start, 650)));
+      };
+      const flow = (id, time, start, from, to) => {
+        const p = progress(time, start, 650);
+        el(id).setAttribute('cx', from[0] + (to[0] - from[0]) * p);
+        el(id).setAttribute('cy', from[1] + (to[1] - from[1]) * p);
+        el(id).style.opacity = p > 0 && p < 1 ? Math.sin(p * Math.PI) : 0;
+      };
+      const pulse = (id, time, start, center) => {
+        const scale = 1 + Math.sin(progress(time, start, 700) * Math.PI) * .07;
+        el(id).setAttribute('transform', `translate(${center[0]} ${center[1]}) scale(${scale}) translate(${-center[0]} ${-center[1]})`);
+      };
+      const steps = [
+        [0, 'Open a Reddit thread.'],
+        [1400, 'ThreadTrail reads the loaded text and comments.'],
+        [2800, 'The thread is saved to a local file.'],
+        [4200, 'Scroll or expand replies to load more comments.'],
+        [6000, 'New comments update the same saved file.']
+      ];
+      window.renderDiagram = time => {
+        time = Math.max(0, time) % duration;
+        reveal('thread-edge', time, 850);
+        reveal('capture-node', time, 1200, true);
+        reveal('save-edge', time, 2050);
+        reveal('file-node', time, 2650, true);
+        reveal('comments-node', time, 4150, true);
+        reveal('comments-edge', time, 4850);
+        reveal('update-note', time, 6000);
+        draw('thread-line', time, 850);
+        draw('save-line', time, 2050);
+        draw('comments-line', time, 4850);
+        flow('thread-flow', time, 950, [254, 169], [450, 225]);
+        flow('comments-flow', time, 5000, [294, 342], [454, 273]);
+        flow('save-flow', time, time < 4000 ? 2200 : 5900, [590, 246], [837, 246]);
+        pulse('capture-orb', time, 5300, [520, 246]);
+        pulse('file-orb', time, 6400, [902, 246]);
+        const index = steps.findLastIndex(step => time >= step[0]);
+        el('step-number').textContent = `${String(index + 1).padStart(2, '0')} / 05`;
+        el('step-copy').textContent = steps[index][1];
+      };
+      window.diagramDuration = duration;
+      window.renderDiagram(0);
+      if (!new URLSearchParams(location.search).has('capture')) {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) window.renderDiagram(8000);
+        else {
+          const start = performance.now();
+          const tick = now => { window.renderDiagram(now - start); requestAnimationFrame(tick); };
+          requestAnimationFrame(tick);
+        }
+      }
+    })();
+  </script>
 </body>
 </html>

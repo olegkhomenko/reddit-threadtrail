@@ -2,7 +2,7 @@
 
 A Chromium extension that saves the Reddit pages you open as local JSON files. Markdown copies are optional.
 
-![A Reddit thread and newly loaded comments flow through ThreadTrail into the same local archive file.](docs/how-it-works.png)
+![A Reddit thread and newly loaded comments flow through ThreadTrail into the same local archive file.](docs/how-it-works.gif)
 
 ## Install
 
