@@ -7,6 +7,7 @@ root = Path(__file__).resolve().parent.parent
 manifest = json.loads((root / "manifest.json").read_text())
 files = ["manifest.json", "common.js", "extractor.js", "content.js", "background.js", "popup.html", "options.html", "ui.js", "ui.css", "README.md", "CHANGELOG.md"]
 files += sorted(set(manifest.get("icons", {}).values()))
+files += ["docs/how-it-works.html", "docs/how-it-works.gif"]
 for file in files:
     if not (root / file).is_file():
         raise SystemExit(f"Missing extension file: {file}")

@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>How Reddit ThreadTrail works</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #fafaf9; color: #181918; font-family: Arial, Helvetica, sans-serif; }
+    .page { width: 1200px; height: 800px; padding: 40px 48px; }
+    header { height: 140px; }
+    h1 { margin: 0; font-size: 48px; line-height: 1.08; letter-spacing: -2.3px; font-weight: 400; }
+    .canvas { height: 580px; border: 1px solid #e9e7e3; border-radius: 28px; background: #f3f2ef; }
+    .canvas { position: relative; overflow: hidden; }
+    .legend { display: flex; align-items: center; gap: 31px; margin: 22px 24px 0; font-size: 17px; color: #777b77; }
+    .legend > span { display: flex; align-items: center; gap: 9px; }
+    .legend .active { padding: 10px 15px; background: #fff; color: #1e211e; border: 1px solid #e6e4e0; border-radius: 24px; box-shadow: 0 1px 2px #00000006; }
+    .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; flex: none; }
+    .green { background: radial-gradient(circle at 32% 27%, #eef9ef 0%, #b7dac7 60%, #87ad99 100%); }
+    .blue { background: radial-gradient(circle at 32% 27%, #e0f3ff 0%, #a1caed 53%, #6e9bd0 100%); }
+    .purple { background: radial-gradient(circle at 32% 27%, #f5eaff 0%, #d1bdf0 60%, #ad92d2 100%); }
+    .orange { background: radial-gradient(circle at 32% 27%, #fff0d8 0%, #f5c0a5 57%, #dc998b 100%); }
+    .graph { display: block; width: 100%; height: 442px; margin-top: 4px; }
+    .graph .edge { fill: none; stroke: #666a67; stroke-width: 1.7; }
+    .graph .arrow { fill: #666a67; }
+    .graph .port { fill: #333733; }
+    .graph .label { font: 26px Arial, Helvetica, sans-serif; fill: #202320; }
+    .graph .note { font: 17px "SFMono-Regular", Consolas, monospace; fill: #ad542e; }
+    .graph .shadow { filter: url(#soft-shadow); }
+    .caption { margin: -2px 0 0; display: flex; align-items: center; justify-content: center; gap: 11px; color: #676c67; font-size: 18px; }
+    .caption .step-number { background: #fff; border-radius: 18px; padding: 7px 13px; color: #353a35; font: 14px "SFMono-Regular", Consolas, monospace; }
+    .flow { pointer-events: none; }
+    .reveal { opacity: 0; }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <h1>How ThreadTrail<br>keeps a thread.</h1>
+    </header>
+      <section class="canvas" aria-label="Thread capture and update flow">
+        <div class="legend" aria-hidden="true">
+          <span class="active"><i class="dot green"></i>Your browser</span>
+          <span><i class="dot blue"></i>Capture</span>
+          <span><i class="dot purple"></i>Update</span>
+          <span><i class="dot orange"></i>Save</span>
+        </div>
+        <svg class="graph" viewBox="0 0 1048 462" role="img" aria-labelledby="graph-title graph-description">
+          <title id="graph-title">Reddit ThreadTrail saves visited threads and updates them when more comments load.</title>
+          <desc id="graph-description">A Reddit thread and additional comments flow into ThreadTrail. It reads only loaded content and saves JSON and optional Markdown in a local folder. New comments update the same visit file.</desc>
+          <defs>
+            <radialGradient id="node-green" cx="32%" cy="27%" r="82%"><stop stop-color="#f2faf3"/><stop offset=".55" stop-color="#c9e1d3"/><stop offset="1" stop-color="#9cbbaa"/></radialGradient>
+            <radialGradient id="node-blue" cx="32%" cy="27%" r="82%"><stop stop-color="#e4f5ff"/><stop offset=".53" stop-color="#a1caed"/><stop offset="1" stop-color="#6e9bd0"/></radialGradient>
+            <radialGradient id="node-purple" cx="32%" cy="27%" r="82%"><stop stop-color="#f7eeff"/><stop offset=".55" stop-color="#d8c3f4"/><stop offset="1" stop-color="#ae94d4"/></radialGradient>
+            <radialGradient id="node-orange" cx="32%" cy="27%" r="82%"><stop stop-color="#fff0d8"/><stop offset=".55" stop-color="#f5c0a5"/><stop offset="1" stop-color="#db998b"/></radialGradient>
+            <filter id="soft-shadow" x="-60%" y="-60%" width="220%" height="230%"><feDropShadow dx="0" dy="12" stdDeviation="15" flood-color="#4d554e" flood-opacity=".09"/></filter>
+            <marker id="arrowhead" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto" markerUnits="userSpaceOnUse"><path class="arrow" d="M0 0 L7 4 L0 8 Z"/></marker>
+          </defs>
+          <g id="thread-edge" class="reveal">
+            <line id="thread-line" class="edge" x1="254" y1="169" x2="450" y2="225" marker-end="url(#arrowhead)"/>
+            <circle class="port" cx="254" cy="169" r="3.7"/>
+          </g>
+          <g id="comments-edge" class="reveal">
+            <line id="comments-line" class="edge" x1="294" y1="342" x2="454" y2="273" marker-end="url(#arrowhead)"/>
+            <circle class="port" cx="294" cy="342" r="3.7"/>
+          </g>
+          <g id="save-edge" class="reveal">
+            <line id="save-line" class="edge" x1="590" y1="246" x2="837" y2="246" marker-end="url(#arrowhead)"/>
+            <circle class="port" cx="590" cy="246" r="3.7"/>
+          </g>
+          <g id="thread-node">
+            <circle class="shadow" cx="195" cy="151" r="56" fill="url(#node-green)"/>
+            <text class="label" x="195" y="61" text-anchor="middle">Open a thread</text>
+            <text class="note" x="195" y="88" text-anchor="middle">you browse Reddit</text>
+          </g>
+          <g id="comments-node" class="reveal">
+            <circle class="shadow" cx="240" cy="366" r="56" fill="url(#node-purple)"/>
+            <text class="label" x="77" y="281">More comments</text>
+            <text class="note" x="77" y="308">you scroll or expand</text>
+          </g>
+          <g id="capture-node" class="reveal">
+            <g id="capture-orb">
+              <circle class="shadow" cx="520" cy="246" r="69" fill="#f6faff" stroke="#252d33" stroke-width="1.8"/>
+              <circle cx="520" cy="246" r="61" fill="url(#node-blue)"/>
+            </g>
+            <text class="label" x="520" y="128" text-anchor="middle">ThreadTrail</text>
+            <text class="note" x="520" y="155" text-anchor="middle">reads loaded content</text>
+          </g>
+          <g id="file-node" class="reveal">
+            <g id="file-orb">
+              <circle class="shadow" cx="902" cy="246" r="61" fill="#fffdf9" stroke="#c9c5bf" stroke-width="1.5"/>
+              <circle cx="902" cy="246" r="54" fill="url(#node-orange)"/>
+            </g>
+            <text class="label" x="902" y="128" text-anchor="middle">Local files</text>
+            <text class="note" x="902" y="155" text-anchor="middle">JSON + optional Markdown</text>
+          </g>
+          <text id="update-note" class="note reveal" x="716" y="283" text-anchor="middle">same visit, same file</text>
+          <circle id="thread-flow" class="flow" r="5" fill="#6e9bd0" opacity="0"/>
+          <circle id="comments-flow" class="flow" r="5" fill="#ae94d4" opacity="0"/>
+          <circle id="save-flow" class="flow" r="5" fill="#dc998b" opacity="0"/>
+        </svg>
+        <p class="caption" aria-live="off"><span id="step-number" class="step-number">01 / 05</span><span id="step-copy">Open a Reddit thread.</span></p>
+      </section>
+  </main>
+  <script>
+    (() => {
+      const duration = 10000;
+      const el = id => document.getElementById(id);
+      const clamp = value => Math.max(0, Math.min(1, value));
+      const progress = (time, start, length = 550) => clamp((time - start) / length);
+      const ease = value => 1 - Math.pow(1 - value, 3);
+      const reveal = (id, time, start, translate = false) => {
+        const p = ease(progress(time, start));
+        const end = 1 - progress(time, 9600, 400);
+        el(id).style.opacity = p * end;
+        if (translate) el(id).setAttribute('transform', `translate(0 ${(1 - p) * 12})`);
+      };
+      const draw = (id, time, start) => {
+        const line = el(id);
+        const length = line.getTotalLength();
+        line.style.strokeDasharray = length;
+        line.style.strokeDashoffset = length * (1 - ease(progress(time, start, 650)));
+      };
+      const flow = (id, time, start, from, to) => {
+        const p = progress(time, start, 650);
+        el(id).setAttribute('cx', from[0] + (to[0] - from[0]) * p);
+        el(id).setAttribute('cy', from[1] + (to[1] - from[1]) * p);
+        el(id).style.opacity = p > 0 && p < 1 ? Math.sin(p * Math.PI) : 0;
+      };
+      const pulse = (id, time, start, center) => {
+        const scale = 1 + Math.sin(progress(time, start, 700) * Math.PI) * .07;
+        el(id).setAttribute('transform', `translate(${center[0]} ${center[1]}) scale(${scale}) translate(${-center[0]} ${-center[1]})`);
+      };
+      const steps = [
+        [0, 'Open a Reddit thread.'],
+        [1400, 'ThreadTrail reads the loaded text and comments.'],
+        [2800, 'The thread is saved to a local file.'],
+        [4200, 'Scroll or expand replies to load more comments.'],
+        [6000, 'New comments update the same saved file.']
+      ];
+      window.renderDiagram = time => {
+        time = Math.max(0, time) % duration;
+        reveal('thread-edge', time, 850);
+        reveal('capture-node', time, 1200, true);
+        reveal('save-edge', time, 2050);
+        reveal('file-node', time, 2650, true);
+        reveal('comments-node', time, 4150, true);
+        reveal('comments-edge', time, 4850);
+        reveal('update-note', time, 6000);
+        draw('thread-line', time, 850);
+        draw('save-line', time, 2050);
+        draw('comments-line', time, 4850);
+        flow('thread-flow', time, 950, [254, 169], [450, 225]);
+        flow('comments-flow', time, 5000, [294, 342], [454, 273]);
+        flow('save-flow', time, time < 4000 ? 2200 : 5900, [590, 246], [837, 246]);
+        pulse('capture-orb', time, 5300, [520, 246]);
+        pulse('file-orb', time, 6400, [902, 246]);
+        const index = steps.findLastIndex(step => time >= step[0]);
+        el('step-number').textContent = `${String(index + 1).padStart(2, '0')} / 05`;
+        el('step-copy').textContent = steps[index][1];
+      };
+      window.diagramDuration = duration;
+      window.renderDiagram(0);
+      if (!new URLSearchParams(location.search).has('capture')) {
+        if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) window.renderDiagram(8000);
+        else {
+          const start = performance.now();
+          const tick = now => { window.renderDiagram(now - start); requestAnimationFrame(tick); };
+          requestAnimationFrame(tick);
+        }
+      }
+    })();
+  </script>
+</body>
+</html>
